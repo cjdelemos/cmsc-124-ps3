@@ -96,9 +96,43 @@ CLOSURE is not a closure, and when the argument count does not match."
 ;;; The dispatcher.
 
 (defun eval-expr (expr env)
-  "The value of EXPR in ENV.
+  "The value of EXPR in ENV."
+  (cond
+    ;; Numbers evaluate to themselves.
+    ((numberp expr)
+     expr)
 
-Order the branches with care. NIL is a symbol as well as the empty list, and a
-number is not a cons, so the atom tests come before the list tests."
-  (declare (ignore expr env))
-  (error "eval-expr is not implemented"))
+    ;; Symbols are looked up in the environment.
+    ((symbolp expr)
+     (lookup expr env))
+
+    ;; Empty list evaluates to NIL.
+    ((null expr)
+     nil)
+
+    ;; Handle compound expressions.
+    ((consp expr)
+     (let ((operator (first expr))
+           (operands (rest expr)))
+       (cond
+         ;; Arithmetic operations.
+         ((member operator '(+ - *) :test #'eq)
+          (apply-op operator (eval-operands operands env)))
+
+         ;; LET expression.
+         ((eq operator 'let)
+          (eval-let expr env))
+
+         ;; LAMBDA expression.
+         ((eq operator 'lambda)
+          (make-closure (second expr) (third expr) env))
+
+         ;; Function application.
+         (t
+          (let ((function (eval-expr operator env))
+                (args (eval-operands operands env)))
+            (apply-closure function args))))))
+
+    ;; Unsupported expression.
+    (t
+     (error "Invalid expression: ~S" expr))))
