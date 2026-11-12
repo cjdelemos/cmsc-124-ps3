@@ -1,7 +1,11 @@
 # Environments and the Toy Evaluator
 
-Replace this paragraph after your checks pass. Trace one form through your own
-`eval-expr`, point to the line that captures the defining environment, say what
-would change if application joined the arguments to the caller's environment
-instead, and explain why the host CLISP needs `funcall` where the toy language
-doesn't.
+The toy Lisp evaluator we implemented in src/evaluator.lisp uses environments to store variable names and their corresponding values. These environments are represented as association lists where each variable is paired with its value. Our evaluator uses these bindings to resolve variables during expression evaluation. Closures extend this mechanism by preserving the environment in which a lambda expression is defined. This allows functions to access variables from their original context even when called elsewhere.
+
+Consider the expression (let ((x 10)) ((lambda (y) (+ x y)) 5)). In our implementation, eval-expr recognizes the let expression and calls eval-let which evaluates the binding and creates an extended environment containing x = 10. When our evaluator encounters the lambda expression, it calls make-closure and stores the parameters, body and current environment. When the resulting closure is called with 5, eval-expr evaluates the argument and invokes apply-closure. The function body is then evaluated using the saved environment extended with y = 5. Since x = 10 and y = 5, our evaluator returns 15.
+
+The defining environment is captured in our make-closure function through (list :closure params body env). This expression creates a closure containing its identifier, parameters, body and the environment in which the lambda expression was defined. By saving env, our evaluator preserves the original variable bindings for future function calls. In the example, the captured environment contains x = 10. When the closure is applied, apply-closure retrieves this saved environment and uses extend-env to add the function's parameters and supplied arguments. The body is then evaluated using this extended environment. This allows the function to access both its original variable bindings and its own parameters.
+
+An application using the caller’s environment would change the scope from lexical into dynamic scoping. An example from our module would be P12. The lambda captures the lexical environment, which prevents the new value from being read, even if the same name is assigned later. If variables were to be handled with dynamic scoping, a local variable of a function sharing a name with a variable would silently change the value that is accessed even if it’s completely unrelated otherwise.
+
+CLISP needs funcall because the variables and functions are stored in two namespaces. The expression (let ((f (lambda (n) (* n n)))) would not be called by (f 3) because it would not be found in the function namespace. It would need (funcall f 3) in order for it to be evaluated properly as a function stored in a variable.
