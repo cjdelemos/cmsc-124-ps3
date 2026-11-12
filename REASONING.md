@@ -17,6 +17,8 @@ The expression uses prefix notation where the innermost operation is evaluated f
 ## P02
 The quote returns its argument without evaluating its value. This makes it so that (+ 1 2) is not evaluated as 3 but returned as itself.
 
+Correction: The quote returns a list instead of an integer. The mistake was thinking that the type would be the same before evaluating (+,1,2).
+
 ## P03
 The quote operator prevents the expression from being evaluated and returns nil directly. NIL represents an empty list, so its kind is classified as null and its length is 0.
 
