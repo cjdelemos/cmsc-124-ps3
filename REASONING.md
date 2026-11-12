@@ -20,11 +20,15 @@ The quote returns its argument without evaluating its value. This makes it so th
 ## P03
 The quote operator prevents the expression from being evaluated and returns nil directly. NIL represents an empty list, so its kind is classified as null and its length is 0.
 
+Correction: Since nil represents the empty list, its operator classification is none because it is evaluated as an atomic value rather than an operator expression.
+
 ## P04
 T is a symbol that just evaluates to itself. It’s a symbol and not a list so the length is 0.
 
 ## P05
 The symbolp function checks whether the given argument is a symbol. Since the argument is an empty list, the expression returns nil. The result has kind null and no sequence length.
+
+Correction: In Common Lisp, nil is also considered a symbol. Therefore, symbolp nil returns t, which has the kind symbol.
 
 ## P06
 The car operator returns the first symbol of a list. In this case, it was given an empty list, thus returning nil as a list of length 0.
@@ -37,6 +41,8 @@ The if statement asks if null is the same as an empty list, and it evaluates as 
 
 ## P09
 The and operator evaluates its arguments from left to right and stops when it encounters a false value. Since the second argument is nil, the result is nil. The result has kind null and length 0. The operator is classified as a function because it performs a logical operation.
+
+Correction: The and operator is classified as a special-operator in CLISP. It evaluates its arguments from left to right and returns nil when it encounters the first false value.
 
 ## P10
 The progn special form runs all its subforms and returns the value of the last one. defvar makes *ps3-rate* a variable with value 2, it’s able to be called with ps3-scale. let changes the value to 10 and ps3-scale sees the value of *ps3-rate* as 10, so it evaluates 3*10, and 30 is returned.
