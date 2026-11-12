@@ -49,20 +49,19 @@ OP is the symbol +, -, or *. Signal an error for anything else."
 ;;; E3 -- let.
 
 (defun extend-env (params args env)
-  "ENV with PARAMS bound to ARGS in front of it.
-
-MAPCAR takes two lists and #'CONS pairs them. Build a new list. Do not modify
-ENV, because the caller keeps using it after the extension goes out of scope."
-  (declare (ignore params args env))
-  (error "extend-env is not implemented"))
+  "ENV with PARAMS bound to ARGS in front of it."
+  (append (mapcar #'cons params args) env))
 
 (defun eval-let (expr env)
-  "Evaluate (let ((name init) ...) body).
-
-Every init is evaluated in ENV before any name is bound, so the bindings happen
-in parallel and an init cannot see a name the same LET introduces."
-  (declare (ignore expr env))
-  (error "eval-let is not implemented"))
+  "Evaluate a let expression using parallel bindings."
+  (let* ((bindings (second expr))
+         (body (third expr))
+         (params (mapcar #'first bindings))
+         (values (mapcar (lambda (binding)
+                           (eval-expr (second binding) env))
+                         bindings))
+         (new-env (extend-env params values env)))
+    (eval-expr body new-env)))
 
 ;;; E4 -- lambda and application.
 
@@ -70,19 +69,23 @@ in parallel and an init cannot see a name the same LET introduces."
   "A closure over ENV.
 
 Return the list (:closure params body env). ENV is the environment the lambda
-was written in, not the one it will later be called from. Saving the wrong one
-is what makes the difference between 3 and 101 in the case the manual walks
-through."
-  (declare (ignore params body env))
-  (error "make-closure is not implemented"))
+was written in, not the one it will later be called from."
+  (list :closure params body env))
 
 (defun apply-closure (closure args)
   "Run CLOSURE on ARGS.
 
 The parameters join the environment the closure captured. Signal an error when
 CLOSURE is not a closure, and when the argument count does not match."
-  (declare (ignore closure args))
-  (error "apply-closure is not implemented"))
+  (unless (and (consp closure)
+               (eq (first closure) :closure))
+    (error "Invalid closure: ~A" closure))
+  (let ((params (second closure))
+        (body (third closure))
+        (env (fourth closure)))
+    (unless (= (length params) (length args))
+      (error "Closure argument count mismatch"))
+    (eval-expr body (extend-env params args env))))
 
 ;;; The dispatcher.
 
