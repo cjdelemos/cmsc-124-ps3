@@ -1,5 +1,11 @@
-<!--no-pdf-->
-# CMSC 124 Problem Set 3 Starter
+# CMSC 124 Problem Set 3 – LISPing Your Functions
+
+## Contributors
+
+| Name | GitHub Username |
+|---|---|
+| Carlo Joshua De Lemos | [@cjdelemos](https://github.com/cjdelemos) |
+| John Romson Erazo | [@Apong516](https://github.com/Apong516) |
 
 This repository holds the CLISP prediction corpus and the toy evaluator for
 Problem Set 3. The assignment manual defines the work and the submission rules.
